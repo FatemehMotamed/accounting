@@ -61,6 +61,9 @@ class ClassTime(TimeStampMixin):
     classs = models.ForeignKey(to=Class, on_delete=models.CASCADE, related_name="times")
     # sessions
 
+    def __str__(self):
+        return f"{self.get_weekday_display()} {str(self.start_time)[:5]} {self.classs.student}"
+
 class Session(TimeStampMixin):
     class_time = models.ForeignKey(to=ClassTime, on_delete=models.PROTECT, related_name="sessions")
     date = models.DateTimeField(default=timezone.now)
