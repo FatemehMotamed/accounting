@@ -8,9 +8,20 @@ from .forms import DateForm
 # Create your views here.
 class PaymentList(generic.ListView):
     model = Session
-    queryset = Session.objects.filter(paid_time__isnull=False)
     template_name = "payment_list.html"
     context_object_name = "sessions"
+
+    def get_queryset(self):
+        queryset = Session.objects.filter(paid_time__isnull=False)
+        self.form = DateForm(self.request.GET)
+        if self.form.is_valid():
+            start = self.form.cleaned_data.get("start_date")
+            end = self.form.cleaned_data.get("end_date")
+            if start:
+                queryset = queryset.filter(date__gte=start)
+            if end:
+                queryset = queryset.filter(date__lte=end)
+        return queryset
 
     def get_context_data(self, **kwargs):
         form = DateForm()
@@ -21,11 +32,3 @@ class PaymentList(generic.ListView):
         )
         return context
 
-    def get(self, request, *args, **kwargs):
-        form = DateForm(request.GET)
-        if form.is_valid():
-            start = form.cleaned_data.get("start_date")
-            end = form.cleaned_data.get("end_date")
-            print(start, end)
-        return super().get(request, *args, **kwargs)
-    
